@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
+import { Header } from "@/components/Header";
 import { SensorCard } from "@/components/SensorCard";
 import { AIPrediction } from "@/components/AIPrediction";
 import { ControlPanel } from "@/components/ControlPanel";
 import { WaterUsageChart } from "@/components/WaterUsageChart";
 import { SystemStatus } from "@/components/SystemStatus";
+import { AlertsPanel } from "@/components/AlertsPanel";
+import { PerformanceMetrics } from "@/components/PerformanceMetrics";
+import { TechnicalSpecs } from "@/components/TechnicalSpecs";
+import { Footer } from "@/components/Footer";
 import { Droplets, Thermometer, Cloud, Gauge } from "lucide-react";
 
 const Index = () => {
@@ -32,25 +37,16 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border bg-gradient-primary shadow-glow">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Smart Irrigation System</h1>
-              <p className="text-sm text-white/90">AI-Powered Agricultural Automation</p>
-            </div>
-            <div className="hidden md:flex items-center gap-4">
-              <div className="rounded-full bg-white/20 px-4 py-2 backdrop-blur-sm">
-                <p className="text-sm font-medium text-white">VTU Final Year Project</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Dashboard */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-6">
+        {/* Performance Overview */}
+        <div className="mb-6 grid gap-4 md:grid-cols-2">
+          <PerformanceMetrics />
+          <TechnicalSpecs />
+        </div>
+
         <div className="grid gap-6 lg:grid-cols-12">
           {/* Sensor Cards */}
           <div className="lg:col-span-8">
@@ -105,28 +101,14 @@ const Index = () => {
               reason="Based on soil moisture trends and weather forecast, optimal watering window detected in 3 hours."
             />
             <ControlPanel />
+            <AlertsPanel />
             <SystemStatus />
           </div>
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-12 rounded-lg border-2 border-primary/20 bg-gradient-card p-6 text-center shadow-card">
-          <h3 className="mb-2 text-xl font-bold">Project Information</h3>
-          <p className="text-sm text-muted-foreground mb-4">
-            This Smart Irrigation System uses machine learning algorithms to optimize water usage
-            based on real-time sensor data, weather forecasts, and historical patterns.
-          </p>
-          <div className="flex flex-wrap justify-center gap-4 text-xs">
-            <div className="rounded-lg bg-primary/10 px-4 py-2">
-              <span className="font-semibold text-primary">Technology:</span> IoT + AI/ML
-            </div>
-            <div className="rounded-lg bg-secondary/10 px-4 py-2">
-              <span className="font-semibold text-secondary">Sensors:</span> DHT22, Soil Moisture, Ultrasonic
-            </div>
-            <div className="rounded-lg bg-accent/10 px-4 py-2">
-              <span className="font-semibold text-accent">Platform:</span> Raspberry Pi + Cloud
-            </div>
-          </div>
+        {/* Footer */}
+        <div className="mt-8">
+          <Footer />
         </div>
       </main>
     </div>
