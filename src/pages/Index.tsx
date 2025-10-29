@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Header } from "@/components/Header";
 import { SensorCard } from "@/components/SensorCard";
 import { AIPrediction } from "@/components/AIPrediction";
@@ -10,24 +9,14 @@ import { PerformanceMetrics } from "@/components/PerformanceMetrics";
 import { TechnicalSpecs } from "@/components/TechnicalSpecs";
 import { Footer } from "@/components/Footer";
 import { Droplets, Thermometer, Cloud, Gauge } from "lucide-react";
+import { useSensorData } from "@/hooks/useSensorData";
+import { useAIPrediction } from "@/hooks/useAIPrediction";
+import { useSystemAlerts } from "@/hooks/useSystemAlerts";
 
 const Index = () => {
-  const [moisture, setMoisture] = useState(65);
-  const [temperature, setTemperature] = useState(28);
-  const [humidity, setHumidity] = useState(72);
-  const [waterLevel, setWaterLevel] = useState(85);
-
-  // Simulate real-time sensor updates
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setMoisture((prev) => Math.max(0, Math.min(100, prev + (Math.random() - 0.5) * 2)));
-      setTemperature((prev) => Math.max(15, Math.min(45, prev + (Math.random() - 0.5) * 0.5)));
-      setHumidity((prev) => Math.max(30, Math.min(100, prev + (Math.random() - 0.5) * 1)));
-      setWaterLevel((prev) => Math.max(0, Math.min(100, prev - Math.random() * 0.1)));
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
+  const { sensorData, isLoading: sensorsLoading } = useSensorData();
+  const { prediction, isLoading: predictionLoading } = useAIPrediction();
+  const { alerts, isLoading: alertsLoading, markAsRead } = useSystemAlerts();
 
   const getSensorStatus = (value: number, optimal: [number, number]): "optimal" | "warning" | "critical" => {
     if (value >= optimal[0] && value <= optimal[1]) return "optimal";
@@ -54,34 +43,34 @@ const Index = () => {
             <div className="grid gap-4 sm:grid-cols-2">
               <SensorCard
                 title="Soil Moisture"
-                value={moisture.toFixed(1)}
+                value={sensorData.soil_moisture.toFixed(1)}
                 unit="%"
                 icon={Droplets}
-                status={getSensorStatus(moisture, [60, 80])}
-                trend={moisture > 65 ? "up" : "down"}
+                status={getSensorStatus(sensorData.soil_moisture, [60, 80])}
+                trend={sensorData.soil_moisture > 65 ? "up" : "down"}
               />
               <SensorCard
                 title="Temperature"
-                value={temperature.toFixed(1)}
+                value={sensorData.temperature.toFixed(1)}
                 unit="°C"
                 icon={Thermometer}
-                status={getSensorStatus(temperature, [20, 30])}
-                trend={temperature > 28 ? "up" : "down"}
+                status={getSensorStatus(sensorData.temperature, [20, 30])}
+                trend={sensorData.temperature > 28 ? "up" : "down"}
               />
               <SensorCard
                 title="Humidity"
-                value={humidity.toFixed(1)}
+                value={sensorData.humidity.toFixed(1)}
                 unit="%"
                 icon={Cloud}
-                status={getSensorStatus(humidity, [65, 85])}
+                status={getSensorStatus(sensorData.humidity, [65, 85])}
                 trend="stable"
               />
               <SensorCard
                 title="Water Level"
-                value={waterLevel.toFixed(1)}
+                value={sensorData.water_level.toFixed(1)}
                 unit="%"
                 icon={Gauge}
-                status={getSensorStatus(waterLevel, [70, 100])}
+                status={getSensorStatus(sensorData.water_level, [70, 100])}
                 trend="down"
               />
             </div>
@@ -94,14 +83,16 @@ const Index = () => {
 
           {/* Side Panel */}
           <div className="lg:col-span-4 space-y-6">
-            <AIPrediction
-              nextWatering="Today, 6:30 PM"
-              confidence={92}
-              waterAmount="42L"
-              reason="Based on soil moisture trends and weather forecast, optimal watering window detected in 3 hours."
-            />
+            {!predictionLoading && prediction && (
+              <AIPrediction
+                nextWatering={new Date(prediction.next_watering).toLocaleString()}
+                confidence={prediction.confidence}
+                waterAmount={prediction.water_amount}
+                reason={prediction.reason}
+              />
+            )}
             <ControlPanel />
-            <AlertsPanel />
+            <AlertsPanel alerts={alerts} onMarkAsRead={markAsRead} isLoading={alertsLoading} />
             <SystemStatus />
           </div>
         </div>

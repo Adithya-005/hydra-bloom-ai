@@ -2,41 +2,16 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle, Info, Bell } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { SystemAlert } from "@/hooks/useSystemAlerts";
 
-interface Alert {
-  id: string;
-  type: "warning" | "success" | "info" | "critical";
-  title: string;
-  message: string;
-  time: string;
+interface AlertsPanelProps {
+  alerts: SystemAlert[];
+  onMarkAsRead: (alertId: string) => void;
+  isLoading: boolean;
 }
 
-const alerts: Alert[] = [
-  {
-    id: "1",
-    type: "warning",
-    title: "Low Water Level",
-    message: "Tank water level below 20%. Refill recommended.",
-    time: "2 mins ago",
-  },
-  {
-    id: "2",
-    type: "success",
-    title: "Watering Completed",
-    message: "Scheduled irrigation cycle completed successfully.",
-    time: "1 hour ago",
-  },
-  {
-    id: "3",
-    type: "info",
-    title: "Weather Update",
-    message: "Rain forecasted tomorrow. AI adjusted watering schedule.",
-    time: "3 hours ago",
-  },
-];
-
-export const AlertsPanel = () => {
-  const getAlertIcon = (type: Alert["type"]) => {
+export const AlertsPanel = ({ alerts, onMarkAsRead, isLoading }: AlertsPanelProps) => {
+  const getAlertIcon = (type: string) => {
     switch (type) {
       case "critical":
       case "warning":
@@ -45,10 +20,12 @@ export const AlertsPanel = () => {
         return <CheckCircle className="h-5 w-5" />;
       case "info":
         return <Info className="h-5 w-5" />;
+      default:
+        return <Info className="h-5 w-5" />;
     }
   };
 
-  const getAlertColor = (type: Alert["type"]) => {
+  const getAlertColor = (type: string) => {
     switch (type) {
       case "critical":
         return "text-destructive bg-destructive/10 border-destructive/20";
@@ -58,7 +35,20 @@ export const AlertsPanel = () => {
         return "text-success bg-success/10 border-success/20";
       case "info":
         return "text-info bg-info/10 border-info/20";
+      default:
+        return "text-info bg-info/10 border-info/20";
     }
+  };
+
+  const formatTime = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = Math.floor((now.getTime() - date.getTime()) / 1000 / 60);
+    
+    if (diff < 1) return "Just now";
+    if (diff < 60) return `${diff} mins ago`;
+    if (diff < 1440) return `${Math.floor(diff / 60)} hours ago`;
+    return date.toLocaleDateString();
   };
 
   return (
@@ -73,26 +63,33 @@ export const AlertsPanel = () => {
             <p className="text-xs text-muted-foreground">Real-time system updates</p>
           </div>
         </div>
-        <Badge variant="outline">{alerts.length} Active</Badge>
+        <Badge variant="outline">{alerts.filter(a => !a.is_read).length} Active</Badge>
       </div>
 
       <ScrollArea className="h-[280px] pr-4">
         <div className="space-y-3">
-          {alerts.map((alert) => (
-            <div
-              key={alert.id}
-              className={`rounded-lg border-2 p-3 transition-all hover:shadow-md ${getAlertColor(alert.type)}`}
-            >
-              <div className="flex items-start gap-3">
-                {getAlertIcon(alert.type)}
-                <div className="flex-1">
-                  <p className="font-semibold text-sm">{alert.title}</p>
-                  <p className="text-xs mt-1 opacity-90">{alert.message}</p>
-                  <p className="text-xs mt-2 opacity-70">{alert.time}</p>
+          {isLoading ? (
+            <p className="text-center text-sm text-muted-foreground">Loading alerts...</p>
+          ) : alerts.length === 0 ? (
+            <p className="text-center text-sm text-muted-foreground">No alerts</p>
+          ) : (
+            alerts.map((alert) => (
+              <div
+                key={alert.id}
+                className={`rounded-lg border-2 p-3 transition-all hover:shadow-md cursor-pointer ${getAlertColor(alert.type)} ${alert.is_read ? 'opacity-50' : ''}`}
+                onClick={() => !alert.is_read && onMarkAsRead(alert.id)}
+              >
+                <div className="flex items-start gap-3">
+                  {getAlertIcon(alert.type)}
+                  <div className="flex-1">
+                    <p className="font-semibold text-sm">{alert.title}</p>
+                    <p className="text-xs mt-1 opacity-90">{alert.message}</p>
+                    <p className="text-xs mt-2 opacity-70">{formatTime(alert.timestamp)}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </ScrollArea>
     </Card>

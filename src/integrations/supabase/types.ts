@@ -14,7 +14,93 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      ai_predictions: {
+        Row: {
+          confidence: number
+          created_at: string
+          id: string
+          next_watering: string
+          reason: string
+          water_amount: string
+        }
+        Insert: {
+          confidence: number
+          created_at?: string
+          id?: string
+          next_watering: string
+          reason: string
+          water_amount: string
+        }
+        Update: {
+          confidence?: number
+          created_at?: string
+          id?: string
+          next_watering?: string
+          reason?: string
+          water_amount?: string
+        }
+        Relationships: []
+      }
+      sensor_readings: {
+        Row: {
+          created_at: string
+          humidity: number
+          id: string
+          soil_moisture: number
+          temperature: number
+          timestamp: string
+          water_level: number
+        }
+        Insert: {
+          created_at?: string
+          humidity: number
+          id?: string
+          soil_moisture: number
+          temperature: number
+          timestamp?: string
+          water_level: number
+        }
+        Update: {
+          created_at?: string
+          humidity?: number
+          id?: string
+          soil_moisture?: number
+          temperature?: number
+          timestamp?: string
+          water_level?: number
+        }
+        Relationships: []
+      }
+      system_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          is_read: boolean
+          message: string
+          timestamp: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message: string
+          timestamp?: string
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          timestamp?: string
+          title?: string
+          type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
